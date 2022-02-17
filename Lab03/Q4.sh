@@ -7,11 +7,19 @@ read number
 
 sum=0
 
-for (( iter=$number ; iter > 0 ; ))
-do
-	digit=`expr $iter \% 10`
-	sum=`expr $sum + $digit`
-	iter=`expr $iter \/ 10`
-done
+digit=`expr $number \% 10`
+sum=`expr $sum + $digit`
+number=`expr $number / 10`
+
+
+digit=`expr $number \% 10`
+sum=`expr $sum + $digit`
+number=`expr $number \/ 10`
+
+
+digit=`expr $number \% 10`
+sum=`expr $sum + $digit`
+number=`expr $number \/ 10`
+
 
 echo "Digit Sum: $sum"
