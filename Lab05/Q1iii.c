@@ -10,7 +10,7 @@ void f() {
   if ( tt == 0) {
     for (int i = 5; i < 8; i++)
     {
-      printf("P%d\n",i);
+      printf("P%d\t%d\t%d\n",i, getpid(), getppid());
       tt = fork();
       if (tt == 0)
         exit(0);
@@ -22,13 +22,14 @@ void f() {
 int main(int argc, char **argv) {
 
   pid_t t = 0;
+  printf("NAME\tPID\tPPID\n");
   for (int i = 1; i <= 4; i++)
   {
-    printf("P%d\n", i);
     t = fork();
     assert(t >= 0);
-    
+
     if (t == 0) {
+      printf("P%d\t%d\t%d\n",i, getpid(), getppid());
       if (i == 3) {
         f();
       }
