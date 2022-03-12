@@ -23,13 +23,15 @@ int main(int argc, char **argv) {
 
   pid_t t = 0;
   printf("NAME\tPID\tPPID\n");
+  printf("P1\t%d\t%d\n", getpid(), getppid());
   for (int i = 1; i <= 4; i++)
   {
     t = fork();
     assert(t >= 0);
 
     if (t == 0) {
-      printf("P%d\t%d\t%d\n",i, getpid(), getppid());
+      if ( i != 1 )
+        printf("P%d\t%d\t%d\n",i, getpid(), getppid());
       if (i == 3) {
         f();
       }
