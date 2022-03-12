@@ -26,9 +26,10 @@ int main(int argc, char **argv)
             pid_t tt = fork();
             if (tt == 0) {
               printf("P%d\t%d\t%d\n", i, getpid(), getppid());
-              break;
+              exit(0);
             }
           }
+          wait(NULL);
         }
       }
       break;
