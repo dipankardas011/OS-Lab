@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     pid_t t = fork();
     assert(t >= 0);
     if (t != 0)
-      exit(0);
+      break;
   }
 
   wait(NULL);
