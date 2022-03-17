@@ -8,24 +8,29 @@
 #include <sys/types.h>
 #include <assert.h>
 
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	pid_t t = 0;
-	printf("Parent process pid: %d\tppid: %d\n",getpid(), getppid());
+	printf("Parent process pid: %d\tppid: %d\n", getpid(), getppid());
+
 	t = fork();
 	assert(t >= 0);
 
 	if (t == 0) {
 		printf("Child 2 pid: %d\tppid: %d\n", getpid(), getppid());
 		exit(0);
-	} else {
-		wait(NULL);
 	}
+	else
+		wait(NULL);
+	
 
 	t = fork();
 	assert(t >= 0);
-	if (t == 0) {
+	if (t > 0)
+		exit(0);
+	else 
 		printf("Child 1 pid: %d\tppid: %d\n", getpid(), getppid());
-	}
-	remove(argv[0]);
+	
+
 	return 0;
 }
