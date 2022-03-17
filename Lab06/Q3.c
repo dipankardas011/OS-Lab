@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
 			if (t > 0) {
 				sleep(0.2);
 				printf("Parent process pid:%d\tppid:%d\n", getpid(), getppid());
-				wait(NULL);
 			} else {
 				sleep(1);
 				printf("Child process pid: %d\tppid: %d\n", getpid(), getppid());
