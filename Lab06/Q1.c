@@ -23,10 +23,10 @@ int main(int argc, char *argv[]) {
 			exit(0);
 		} else {
 			printf("Parent Process pid: %d\tppid: %d\n",getpid(), getppid());
-			wait(NULL);
+			//wait(NULL);
 		}
 	}
-	//wait(NULL);
+	while (wait(NULL) != -1);
 	remove(argv[0]);
 	return 0;
 }

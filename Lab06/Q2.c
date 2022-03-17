@@ -14,22 +14,21 @@ int main(int argc, char *argv[])
 	printf("Parent process pid: %d\tppid: %d\n", getpid(), getppid());
 
 	t = fork();
-	assert(t >= 0);
 
 	if (t == 0) {
 		printf("Child 2 pid: %d\tppid: %d\n", getpid(), getppid());
 		exit(0);
 	}
-	else
-		wait(NULL);
+	
+	while (wait(NULL) != -1);
 	
 
 	t = fork();
-	assert(t >= 0);
 	if (t > 0)
 		exit(0);
-	else 
-		printf("Child 1 pid: %d\tppid: %d\n", getpid(), getppid());
+		
+	sleep(1);
+	printf("Child 1 pid: %d\tppid: %d\n", getpid(), getppid());
 	
 
 	return 0;
