@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 int main() {
+  printf("PID: %d\tPPID: %d\n",getpid(), getppid());
   int fd[2];
   char message[10] = {0};
   assert(pipe(fd) == 0);
@@ -15,14 +16,14 @@ int main() {
   if (id > 0) {
     // parent
     close(fd[0]);
-    printf("Parent\n");
+    printf("PID: %d PPID: %d\tParent\n", getpid(), getppid());
     write(fd[1], "Dipankar", 8);
     wait(NULL);
   } else {
     close(fd[1]);
     printf("CHild\n");
     read(fd[0], &message, 10);
-    printf("Message: %s\n", message);
+    printf("PID: %d PPID: %d\tMessage: %s\n", getpid(), getppid(), message);
   }
   return 0;
 }
