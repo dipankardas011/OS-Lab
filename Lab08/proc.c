@@ -12,6 +12,8 @@ struct proc {
   int arrTime;
   int burstTime;
   enum state currState;
+  int initStartTime;
+  int finalEndTime;
 };
 
 struct proc* Rqueue;
