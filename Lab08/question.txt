@@ -1,11 +1,5 @@
 1 Write a program in C to implement FCFS CPU scheduling without
-arrival time. (o/p-
-* response time✅
-* turnaround time✅
-* idle time✅
-* CPU utilization time
-* completion time✅
-* CPU Utilization)
+arrival time. (o/p-response time, turnaround time, idle time, CPU utilization time, completion time, CPU Utilization)
 
 1 10
 2 5
@@ -24,7 +18,16 @@ utilization time, completion time and CPU Utilization)
 3 Write a program in C to implement SJF CPU scheduling (non-
 preemptive)(o/p-response time, turnaround time , waiting time,
 average waiting time.)
+1 6 4
+2 0 2
+3 4 2
+4 5 6
 
 4 Write a program in C to implement SJF CPU scheduling
 (preemptive)(o/p-response time, turnaround time , waiting time,
 average waiting time.)
+
+1 5 2
+2 0 11
+3 0 10
+4 3 4

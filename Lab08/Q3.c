@@ -1,4 +1,4 @@
-#include "proc.c"
+#include "proc.h"
 #include "timer.h"
 
 #ifndef STDIO_H
@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #endif
 
-int *tempStoreBT;
 
 int NoOfProcesses;
 
@@ -38,16 +37,16 @@ void sched() {
     if (CLK_CYCLE >= Rqueue[i].arrTime 
         && Rqueue[i].currState == EMBRYO) {
 
-      int minArr = i;
+      int minBT = i;
       for (int j = 0; j < NoOfProcesses; j++) {
 
         if (Rqueue[j].currState == EMBRYO
             && CLK_CYCLE >= Rqueue[j].arrTime 
-            && Rqueue[j].arrTime < Rqueue[minArr].arrTime)
+            && Rqueue[j].burstTime < Rqueue[minBT].burstTime)
 
-              minArr = j;
+              minBT = j;
       }
-      i = minArr;
+      i = minBT;
       Rqueue[i].currState = RUNNABLE;
       Rqueue[i].initStartTime = CLK_CYCLE;
       return;
@@ -95,6 +94,10 @@ void proc() {
         int minBT = i;
         for (int j = 0; j < NoOfProcesses; j++) {
           if (Rqueue[j].currState == RUNNABLE && 
+                Rqueue[minBT].burstTime > Rqueue[j].burstTime)
+              minBT = j;
+          if (Rqueue[j].currState == RUNNABLE && 
+                Rqueue[minBT].burstTime == Rqueue[j].burstTime &&
                 Rqueue[minBT].arrTime > Rqueue[j].arrTime)
               minBT = j;
         }
@@ -116,7 +119,6 @@ void proc() {
 }
 
 void ReportDis() {
-  int totalBT = 0;
   for (int i = 0; i < NoOfProcesses; i++)
   {
     int TT = Rqueue[i].finalEndTime - Rqueue[i].arrTime;
@@ -124,12 +126,7 @@ void ReportDis() {
     int WT = TT - tempStoreBT[i];
     printf("Process\tPID: %d\tBT: %d\tAT: %d\tTT: %d\tWT: %d\tRT: %d\n",
            Rqueue[i].pid, tempStoreBT[i], Rqueue[i].arrTime, TT, WT, RT);
-    totalBT += tempStoreBT[i];
   }
-  printf("TOTAL TIME: %ld\n", CLK_CYCLE);
-  size_t idleTime = CLK_CYCLE - totalBT;
-  printf("TOTAL IDLE Time: %ld\n", idleTime);
-  printf("CPU UTIT: %d\tCPU UTIL PER: %f\n", totalBT, (float)(totalBT) / (CLK_CYCLE));
 }
 
 int main() {

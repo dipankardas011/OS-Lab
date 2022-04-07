@@ -1,4 +1,4 @@
-#include "proc.c"
+#include "proc.h"
 #include "timer.h"
 
 #ifndef STDIO_H
@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #endif
 
-int *tempStoreBT;
 
 int NoOfProcesses;
 

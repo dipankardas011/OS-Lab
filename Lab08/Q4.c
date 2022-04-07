@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "proc.h"
 #include "timer.h"
 
@@ -12,13 +13,12 @@
 int NoOfProcesses;
 
 void enterData() {
-  printf("Enter the PID, BurstTime for each proc\n");
-  int id;
-  int bt;
+  printf("Enter the PID, ArrivialTime & BurstTime for each proc\n");
+  int id, bt, at;
   for (int i = 0; i < NoOfProcesses; i++)
   {
-    scanf("%d %d", &id, &bt);
-    Rqueue[i].arrTime = 0;
+    scanf("%d %d %d", &id, &at, &bt);
+    Rqueue[i].arrTime = at;
     Rqueue[i].burstTime = bt;
     Rqueue[i].currState = EMBRYO;
     Rqueue[i].pid = id;
@@ -38,18 +38,19 @@ void sched() {
     if (CLK_CYCLE >= Rqueue[i].arrTime 
         && Rqueue[i].currState == EMBRYO) {
 
-      int minArr = i;
+      int minBT = i;
       for (int j = 0; j < NoOfProcesses; j++) {
 
         if (Rqueue[j].currState == EMBRYO
             && CLK_CYCLE >= Rqueue[j].arrTime 
-            && Rqueue[j].arrTime < Rqueue[minArr].arrTime)
+            && Rqueue[j].burstTime < Rqueue[minBT].burstTime)
 
-              minArr = j;
+              minBT = j;
       }
-      i = minArr;
+      i = minBT;
       Rqueue[i].currState = RUNNABLE;
-      Rqueue[i].initStartTime = CLK_CYCLE;
+      // it is not always gaurantee that once the program get its RUNNABLE it it loaded on CPU
+      // Rqueue[i].initStartTime = CLK_CYCLE;
       return;
     }
   }
@@ -66,17 +67,26 @@ int isAllDone() {
 void __CPU_SCHED(int idx) {
   Rqueue[idx].currState = RUNNING;
   int BT = Rqueue[idx].burstTime;
-  while (BT > 0) {
+  // if the process starts its exquition for the first time it saves it
+  if (BT == tempStoreBT[idx]) {
+    Rqueue[idx].initStartTime = CLK_CYCLE;
+  }
+  bool flag = true;
+  while (BT > 0 && flag) {
     CLK_CYCLE++;
     BT--;
+    flag = false; // ensuring that cpu runs for only one clk so that we can check continuously 
+    // for the new arrivial process
   }
-  Rqueue[idx].burstTime = 0;
+  Rqueue[idx].burstTime = BT;
   if (BT == 0) {
     Rqueue[idx].finalEndTime = CLK_CYCLE;
+    Rqueue[idx].currState = TERMINATED;
+    printf("COMPLETED!!\tpid: %d\tCLK: %ld\n", Rqueue[idx].pid, CLK_CYCLE);
+    return;
   }
+  Rqueue[idx].currState = RUNNABLE;
   // record the Complition time for a process
-  Rqueue[idx].currState = TERMINATED;
-  printf("COMPLETED!!\tpid: %d\tCLK: %ld\n", Rqueue[idx].pid, CLK_CYCLE);
 }
 
 // returns the index for that process to run
@@ -86,13 +96,33 @@ void proc() {
     if (isAllDone() == 1)
       return;
 
-    for (int i = 0; i < NoOfProcesses; i++) {
+    int i;
+
+    for (i = 0; i < NoOfProcesses; i++) {
       if (Rqueue[i].currState == RUNNABLE) {
-        // found the process
+
+        // find the minBT process
+        int minBT = i;
+        for (int j = 0; j < NoOfProcesses; j++) {
+          if (Rqueue[j].currState == RUNNABLE && 
+                Rqueue[minBT].burstTime > Rqueue[j].burstTime)
+              minBT = j;
+          if (Rqueue[j].currState == RUNNABLE && 
+                Rqueue[minBT].burstTime == Rqueue[j].burstTime &&
+                Rqueue[minBT].arrTime > Rqueue[j].arrTime)
+              minBT = j;
+        }
+
+        i = minBT;
         __CPU_SCHED(i);
-        // Rqueue[i].currState = TERMINATED;
+
         break;
       }
+      
+    }
+    if (i == NoOfProcesses) {
+      // no process was found
+      CLK_CYCLE++;
     }
     // when a process gets completed the scheduler is called
     sched();
@@ -100,20 +130,14 @@ void proc() {
 }
 
 void ReportDis() {
-  int totalBT = 0;
   for (int i = 0; i < NoOfProcesses; i++)
   {
     int TT = Rqueue[i].finalEndTime - Rqueue[i].arrTime;
     int RT = Rqueue[i].initStartTime - Rqueue[i].arrTime;
     int WT = TT - tempStoreBT[i];
     printf("Process\tPID: %d\tBT: %d\tAT: %d\tTT: %d\tWT: %d\tRT: %d\n",
-     Rqueue[i].pid, tempStoreBT[i], Rqueue[i].arrTime, TT, WT, RT);
-    totalBT += tempStoreBT[i];
+           Rqueue[i].pid, tempStoreBT[i], Rqueue[i].arrTime, TT, WT, RT);
   }
-  printf("TOTAL TIME: %ld\n", CLK_CYCLE);
-  size_t idleTime = CLK_CYCLE - totalBT;
-  printf("TOTAL IDLE Time: %ld\n", idleTime);
-  printf("CPU UTIT: %d\tCPU UTIL PER: %f\n", totalBT, (float)(totalBT) / (CLK_CYCLE));
 }
 
 int main() {

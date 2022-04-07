@@ -1,3 +1,7 @@
+#ifndef STDLIB_H
+#include <stdlib.h>
+#endif
+
 enum state {
   RUNNING,
   RUNNABLE,
@@ -16,4 +20,5 @@ struct proc {
   int finalEndTime;
 };
 
-struct proc* Rqueue;
+struct proc* Rqueue = NULL;
+int *tempStoreBT = NULL;
