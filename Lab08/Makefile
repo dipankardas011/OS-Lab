@@ -4,8 +4,14 @@ CFLAGS=-Wall
 q1:
 	$(CC) $(CFLAGS) Q1.c
 
+q2:
+	$(CC) $(CFLAGS) Q2.c
+
+q3:
+	$(CC) $(CFLAGS) Q2.c
+
 run:
 	./a.out
 
 clean:
-	rm *.out
+	rm *.out Q1 Q2 Q3

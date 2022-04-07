@@ -7,9 +7,19 @@ arrival time. (o/p-
 * completion time✅
 * CPU Utilization)
 
+1 10
+2 5
+3 3
+
 2 Write a program in C to implement FCFS CPU scheduling with
 arrival time.(o/p-response time, turnaround time , idle time, CPU
 utilization time, completion time and CPU Utilization)
+
+1 6 4
+2 0 2
+3 4 2
+4 5 6
+
 
 3 Write a program in C to implement SJF CPU scheduling (non-
 preemptive)(o/p-response time, turnaround time , waiting time,

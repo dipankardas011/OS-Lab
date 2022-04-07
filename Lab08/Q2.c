@@ -13,13 +13,12 @@ int *tempStoreBT;
 int NoOfProcesses;
 
 void enterData() {
-  printf("Enter the PID, BurstTime for each proc\n");
-  int id;
-  int bt;
+  printf("Enter the PID, ArrivialTime & BurstTime for each proc\n");
+  int id, bt, at;
   for (int i = 0; i < NoOfProcesses; i++)
   {
-    scanf("%d %d", &id, &bt);
-    Rqueue[i].arrTime = 0;
+    scanf("%d %d %d", &id, &at, &bt);
+    Rqueue[i].arrTime = at;
     Rqueue[i].burstTime = bt;
     Rqueue[i].currState = EMBRYO;
     Rqueue[i].pid = id;
@@ -74,10 +73,10 @@ void __CPU_SCHED(int idx) {
   Rqueue[idx].burstTime = 0;
   if (BT == 0) {
     Rqueue[idx].finalEndTime = CLK_CYCLE;
+    Rqueue[idx].currState = TERMINATED;
+    printf("COMPLETED!!\tpid: %d\tCLK: %ld\n", Rqueue[idx].pid, CLK_CYCLE);
   }
   // record the Complition time for a process
-  Rqueue[idx].currState = TERMINATED;
-  printf("COMPLETED!!\tpid: %d\tCLK: %ld\n", Rqueue[idx].pid, CLK_CYCLE);
 }
 
 // returns the index for that process to run
@@ -87,13 +86,29 @@ void proc() {
     if (isAllDone() == 1)
       return;
 
-    for (int i = 0; i < NoOfProcesses; i++) {
+    int i;
+
+    for (i = 0; i < NoOfProcesses; i++) {
       if (Rqueue[i].currState == RUNNABLE) {
-        // found the process
+
+        // find the minBT process
+        int minBT = i;
+        for (int j = 0; j < NoOfProcesses; j++) {
+          if (Rqueue[j].currState == RUNNABLE && 
+                Rqueue[minBT].arrTime > Rqueue[j].arrTime)
+              minBT = j;
+        }
+
+        i = minBT;
         __CPU_SCHED(i);
-        // Rqueue[i].currState = TERMINATED;
+
         break;
       }
+      
+    }
+    if (i == NoOfProcesses) {
+      // no process was found
+      CLK_CYCLE++;
     }
     // when a process gets completed the scheduler is called
     sched();
@@ -108,7 +123,7 @@ void ReportDis() {
     int RT = Rqueue[i].initStartTime - Rqueue[i].arrTime;
     int WT = TT - tempStoreBT[i];
     printf("Process\tPID: %d\tBT: %d\tAT: %d\tTT: %d\tWT: %d\tRT: %d\n",
-     Rqueue[i].pid, tempStoreBT[i], Rqueue[i].arrTime, TT, WT, RT);
+           Rqueue[i].pid, tempStoreBT[i], Rqueue[i].arrTime, TT, WT, RT);
     totalBT += tempStoreBT[i];
   }
   printf("TOTAL TIME: %ld\n", CLK_CYCLE);
