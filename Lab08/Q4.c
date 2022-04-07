@@ -130,14 +130,17 @@ void proc() {
 }
 
 void ReportDis() {
+  int Swt = 0;
   for (int i = 0; i < NoOfProcesses; i++)
   {
     int TT = Rqueue[i].finalEndTime - Rqueue[i].arrTime;
     int RT = Rqueue[i].initStartTime - Rqueue[i].arrTime;
     int WT = TT - tempStoreBT[i];
+    Swt += WT;
     printf("Process\tPID: %d\tBT: %d\tAT: %d\tTT: %d\tWT: %d\tRT: %d\n",
            Rqueue[i].pid, tempStoreBT[i], Rqueue[i].arrTime, TT, WT, RT);
   }
+  printf("Avg WT: %f\n", (float)(Swt)/NoOfProcesses);
 }
 
 int main() {
