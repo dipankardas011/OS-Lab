@@ -17,9 +17,8 @@ struct pageFrame
 
 void getBinary(unsigned char n)
 {
-    while (n > 0)
-    {
-        printf("%d", n & 1);
+    for (int i = 8; i >= 0; i--) {
+        printf("%d", (n & 1));
         n >>= 1;
     }
     printf("\t");
@@ -30,7 +29,8 @@ void display()
     printf("Refernce bits\tPage_No\n\n");
     for (int i = 0; i < NO_PG_FRAMES; i++)
     {
-        getBinary(arr[i].referenceBit);
+        // getBinary(arr[i].referenceBit);
+        printf("%d\t", arr[i].referenceBit);
         printf("%d\n", arr[i].pageNumber);
     }
 }
@@ -50,6 +50,7 @@ void findPlaceInsert(int *currPages)
             {
                 // present
                 currReference[pgFrameIdx] = 1;
+                arr[pgFrameIdx].referenceBit++;
                 break;
             }
         }
@@ -63,11 +64,13 @@ void findPlaceInsert(int *currPages)
                 if (arr[pgFrameIdx].referenceBit < minV)
                 {
                     minV = arr[pgFrameIdx].referenceBit;
+                    /*Update or Add the 1 to the reference bit*/
                     minIdx = pgFrameIdx;
                 }
             }
             arr[minIdx].pageNumber = pgInsert;
             currReference[minIdx] = 1;
+            arr[minIdx].referenceBit++;
         }
     }
     // update the values
@@ -107,5 +110,6 @@ int main(int argc, char const *argv[])
         findPlaceInsert(pagesToInsert);
         display();
     }
+    remove(argv[0]);
     return 0;
 }
