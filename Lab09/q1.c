@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <limits.h>
 
 #define NO_PG_FRAMES 8
 /*
@@ -9,19 +10,17 @@
  */
 struct pageFrame
 {
-    unsigned char referenceBit;
+    int referenceBit;
     int pageNumber;
 } arr[NO_PG_FRAMES] = {0};
 
 #define CONSTADD (1 << 8)
 
-void getBinary(unsigned char n)
-{
-    for (int i = 8; i >= 0; i--) {
-        printf("%d", (n & 1));
-        n >>= 1;
-    }
-    printf("\t");
+void getBinary(int n, int i) {
+    if (i < 0)
+        return;
+    getBinary((n>>1), i-1);
+    printf("%d", (n & 1));
 }
 
 void display()
@@ -29,15 +28,15 @@ void display()
     printf("Refernce bits\tPage_No\n\n");
     for (int i = 0; i < NO_PG_FRAMES; i++)
     {
-        // getBinary(arr[i].referenceBit);
-        printf("%d\t", arr[i].referenceBit);
-        printf("%d\n", arr[i].pageNumber);
+        getBinary(arr[i].referenceBit, NO_PG_FRAMES);
+        
+        printf("\t%d\n", arr[i].pageNumber);
     }
 }
 
 void findPlaceInsert(int *currPages)
 {
-    unsigned char currReference[NO_PG_FRAMES] = {0};
+    // int currReference[NO_PG_FRAMES] = {0};
 
     for (int i = 0; i < NO_PG_FRAMES; i++)
     {
@@ -48,41 +47,32 @@ void findPlaceInsert(int *currPages)
         {
             if (arr[pgFrameIdx].pageNumber == pgInsert)
             {
-                // present
-                currReference[pgFrameIdx] = 1;
-                arr[pgFrameIdx].referenceBit++;
+                // Page HIT
+                arr[pgFrameIdx].referenceBit |= CONSTADD;
                 break;
             }
         }
         if (pgFrameIdx == NO_PG_FRAMES)
         {
-            // notfound do nothing
+            // Page MISS
             // insert in a suitable place
-            int minV = (1 << 8) + 1, minIdx = 0;
+            int minV = INT_MAX, minIdx = 0;
             for (int pgFrameIdx = 0; pgFrameIdx < NO_PG_FRAMES; pgFrameIdx++)
             {
                 if (arr[pgFrameIdx].referenceBit < minV)
                 {
                     minV = arr[pgFrameIdx].referenceBit;
-                    /*Update or Add the 1 to the reference bit*/
                     minIdx = pgFrameIdx;
                 }
             }
             arr[minIdx].pageNumber = pgInsert;
-            currReference[minIdx] = 1;
-            arr[minIdx].referenceBit++;
+            arr[minIdx].referenceBit |= CONSTADD;
         }
     }
     // update the values
-    // first left shift then add (1 << 8) * currReference[i]
     for (int i = 0; i < NO_PG_FRAMES; i++)
-    {
-        unsigned char temp = currReference[i];
+        arr[i].referenceBit >>= 1;
 
-        arr[i].referenceBit = ((arr[i].referenceBit) >> 1) | (CONSTADD * currReference[i]);
-
-        currReference[i] = 0;
-    }
 }
 
 void initPageNumbers()
@@ -103,9 +93,12 @@ int main(int argc, char const *argv[])
     {
         int pagesToInsert[NO_PG_FRAMES] = {0};
         for (int i = 0; i < NO_PG_FRAMES; i++)
-        {
-            pagesToInsert[i] = rand() % 100;
-        }
+            pagesToInsert[i] = rand() % 10;
+
+        printf("[ ");
+        for (int i = 0; i < NO_PG_FRAMES; i++)
+            printf("%d ", pagesToInsert[i]);
+        printf("]\n");
 
         findPlaceInsert(pagesToInsert);
         display();
