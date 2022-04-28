@@ -1,5 +1,5 @@
 #include <stdbool.h>
-#include "proc.h"
+#include "procRR.h"
 #include "timer.h"
 
 #ifndef STDIO_H
@@ -9,20 +9,20 @@
 #include <stdlib.h>
 #endif
 
+static int Qt = 3; // 3 Qt
 
 int NoOfProcesses;
 
 void enterData() {
   printf("Enter the PID, ArrivialTime & BurstTime & priority for each proc\n");
-  int id, bt, at, pri;
+  int id, bt, at;
   for (int i = 0; i < NoOfProcesses; i++)
   {
-    scanf("%d %d %d %d", &id, &at, &bt, &pri);
+    scanf("%d %d %d", &id, &at, &bt);
     Rqueue[i].arrTime = at;
     Rqueue[i].burstTime = bt;
     Rqueue[i].currState = EMBRYO;
     Rqueue[i].pid = id;
-    Rqueue[i].priority = pri;
     Rqueue[i].initStartTime = Rqueue[i].finalEndTime = 0;
     tempStoreBT[i] = bt;
   }
@@ -31,7 +31,7 @@ void enterData() {
 void __PS() {
   printf("PID\tPri\tArr\tBurst\n");
   for (int i = 0; i < NoOfProcesses; i++)
-    printf("%d\t%d\t%d\t%d\n", Rqueue[i].pid, Rqueue[i].priority, Rqueue[i].arrTime, Rqueue[i].burstTime);
+    printf("%d\t%d\t%d\n", Rqueue[i].pid, Rqueue[i].arrTime, Rqueue[i].burstTime);
 }
 
 void sched() {
@@ -41,18 +41,21 @@ void sched() {
 
       int minBT = i;
       for (int j = 0; j < NoOfProcesses; j++) {
+        /**
+         * TODO: Implement the loogic for the insert in the queue
+         */
 
-        if (Rqueue[j].currState == EMBRYO
-            && CLK_CYCLE >= Rqueue[j].arrTime 
-            && Rqueue[j].priority < Rqueue[minBT].priority)
+        // if (Rqueue[j].currState == EMBRYO
+        //     && CLK_CYCLE >= Rqueue[j].arrTime 
+        //     && Rqueue[j].priority < Rqueue[minBT].priority)
 
-              minBT = j;
-        if (Rqueue[j].currState == EMBRYO
-            && CLK_CYCLE >= Rqueue[j].arrTime 
-            && Rqueue[j].priority == Rqueue[minBT].priority
-            && Rqueue[j].arrTime < Rqueue[minBT].arrTime)
+        //       minBT = j;
+        // if (Rqueue[j].currState == EMBRYO
+        //     && CLK_CYCLE >= Rqueue[j].arrTime 
+        //     && Rqueue[j].priority == Rqueue[minBT].priority
+        //     && Rqueue[j].arrTime < Rqueue[minBT].arrTime)
               
-              minBT = j;
+        //       minBT = j;
       }
       i = minBT;
       Rqueue[i].currState = RUNNABLE;
@@ -78,12 +81,11 @@ void __CPU_SCHED(int idx) {
   if (BT == tempStoreBT[idx]) {
     Rqueue[idx].initStartTime = CLK_CYCLE;
   }
-  bool flag = true;
-  while (BT > 0 && flag) {
+  int currJobBT = Qt;
+  while (BT > 0 && currJobBT > 0) {
     CLK_CYCLE++;
     BT--;
-    flag = false; // ensuring that cpu runs for only one clk so that we can check continuously 
-    // for the new arrivial process
+    currJobBT--;
   }
   Rqueue[idx].burstTime = BT;
   if (BT == 0) {
@@ -109,15 +111,19 @@ void proc() {
       if (Rqueue[i].currState == RUNNABLE) {
 
         // find the minBT process
-        int minBT = i;
-        for (int j = 0; j < NoOfProcesses; j++) {
-          if (Rqueue[j].currState == RUNNABLE && 
-                Rqueue[minBT].priority > Rqueue[j].priority)
-              minBT = j;
-          if (Rqueue[j].currState == RUNNABLE && 
-                Rqueue[minBT].priority == Rqueue[j].priority &&
-                Rqueue[minBT].arrTime > Rqueue[j].arrTime)
-              minBT = j;
+         /**
+         * TODO: Implement the loogic for the insert in the queue
+         */
+
+        // int minBT = i;
+        // for (int j = 0; j < NoOfProcesses; j++) {
+        //   if (Rqueue[j].currState == RUNNABLE && 
+        //         Rqueue[minBT].priority > Rqueue[j].priority)
+        //       minBT = j;
+        //   if (Rqueue[j].currState == RUNNABLE && 
+        //         Rqueue[minBT].priority == Rqueue[j].priority &&
+        //         Rqueue[minBT].arrTime > Rqueue[j].arrTime)
+        //       minBT = j;
         }
 
         i = minBT;
