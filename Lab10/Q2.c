@@ -11,10 +11,11 @@
 
 static int Qt = 3; // 3 Qt
 
+
 int NoOfProcesses;
 
 void enterData() {
-  printf("Enter the PID, ArrivialTime & BurstTime & priority for each proc\n");
+  printf("Enter the PID, ArrivialTime & BurstTime for each proc\n");
   int id, bt, at;
   for (int i = 0; i < NoOfProcesses; i++)
   {
@@ -64,6 +65,45 @@ void sched() {
       return;
     }
   }
+}
+
+/**
+ * @def in real time OS the process are added as they come
+ * be default it comes in inc time order only
+ */
+void sortAccToArrTime() {
+  for (int i = 0; i < NoOfProcesses; i++)
+    {
+        for (int j = 0; j < NoOfProcesses - i - 1; j++)
+        {
+            if (Rqueue[j].arrTime > Rqueue[j + 1].arrTime)
+            {
+                struct proc *T = (struct proc *)malloc(sizeof(struct proc));
+                T->arrTime = Rqueue[j].arrTime;
+                T->currState = Rqueue[j].currState;
+                T->pid = Rqueue[j].pid;
+                T->initStartTime = Rqueue[j].initStartTime;
+                T->finalEndTime = Rqueue[j].finalEndTime;
+                T->burstTime = Rqueue[j].burstTime;
+
+                Rqueue[j].arrTime = Rqueue[j + 1].arrTime;
+                Rqueue[j].currState = Rqueue[j + 1].currState;
+                Rqueue[j].pid = Rqueue[j + 1].pid;
+                Rqueue[j].burstTime = Rqueue[j + 1].burstTime;
+                Rqueue[j].initStartTime = Rqueue[j+1].initStartTime;
+                Rqueue[j].finalEndTime = Rqueue[j+1].finalEndTime;
+                
+                Rqueue[j + 1].arrTime = T->arrTime;
+                Rqueue[j + 1].currState = T->currState;
+                Rqueue[j + 1].pid = T->pid;
+                Rqueue[j + 1].burstTime = T->burstTime;
+                Rqueue[j + 1].initStartTime = T->initStartTime;
+                Rqueue[j + 1].finalEndTime = T->finalEndTime;
+                free(T);
+            }
+        }
+    }
+  
 }
 
 int isAllDone() {
@@ -162,7 +202,9 @@ int main() {
   scanf("%d", &NoOfProcesses);
   Rqueue = (struct proc *)malloc(sizeof(struct proc) * NoOfProcesses);
   tempStoreBT = (int *)malloc(sizeof(int) * NoOfProcesses);
+  initRQ();
   enterData();
+  sortAccToArrTime();
   __PS();
   // initial scheduler is called so as to make the process as runnable
   sched();
