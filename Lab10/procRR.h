@@ -1,7 +1,7 @@
 #ifndef STDLIB_H
 #include <stdlib.h>
 #endif
-#define SIZE 2
+#define SIZE 10
 
 enum state {
   RUNNING,

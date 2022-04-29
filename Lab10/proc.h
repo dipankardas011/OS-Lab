@@ -5,7 +5,6 @@
 enum state {
   RUNNING,
   RUNNABLE,
-  // WAITING,
   TERMINATED,
   EMBRYO
 };
