@@ -10,3 +10,8 @@ average waiting time.)
 2. Write a program in C to implement Round Robin CPU
 scheduling(o/p-response time, turnaround time , waiting time,
 average waiting time.)
+1 4 5
+2 7 8
+3 2 7
+4 6 3
+5 0 6

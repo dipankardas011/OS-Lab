@@ -9,8 +9,7 @@
 #include <stdlib.h>
 #endif
 
-static int Qt = 3; // 3 Qt
-
+static int Qt = 2; // 3 Qt
 
 int NoOfProcesses;
 
@@ -30,7 +29,7 @@ void enterData() {
 }
 
 void __PS() {
-  printf("PID\tPri\tArr\tBurst\n");
+  printf("PID\tArr\tBurst\n");
   for (int i = 0; i < NoOfProcesses; i++)
     printf("%d\t%d\t%d\n", Rqueue[i].pid, Rqueue[i].arrTime, Rqueue[i].burstTime);
 }
@@ -40,29 +39,15 @@ void sched() {
     if (CLK_CYCLE >= Rqueue[i].arrTime 
         && Rqueue[i].currState == EMBRYO) {
 
-      int minBT = i;
-      for (int j = 0; j < NoOfProcesses; j++) {
-        /**
-         * TODO: Implement the loogic for the insert in the queue
-         */
-
-        // if (Rqueue[j].currState == EMBRYO
-        //     && CLK_CYCLE >= Rqueue[j].arrTime 
-        //     && Rqueue[j].priority < Rqueue[minBT].priority)
-
-        //       minBT = j;
-        // if (Rqueue[j].currState == EMBRYO
-        //     && CLK_CYCLE >= Rqueue[j].arrTime 
-        //     && Rqueue[j].priority == Rqueue[minBT].priority
-        //     && Rqueue[j].arrTime < Rqueue[minBT].arrTime)
-              
-        //       minBT = j;
-      }
-      i = minBT;
+      
       Rqueue[i].currState = RUNNABLE;
-      // it is not always gaurantee that once the program get its RUNNABLE it it loaded on CPU
-      // Rqueue[i].initStartTime = CLK_CYCLE;
-      return;
+      int ret = pushRQ(i);
+      if (!ret) {
+        system("echo \"$(tput setaf 2)$(tput bold)UNKNOWN: $(tput init)Resource leak or INF loop\"");
+        while (1){
+          printf("1001");
+        } // ♾️ loop
+      }
     }
   }
 }
@@ -72,38 +57,37 @@ void sched() {
  * be default it comes in inc time order only
  */
 void sortAccToArrTime() {
-  for (int i = 0; i < NoOfProcesses; i++)
-    {
-        for (int j = 0; j < NoOfProcesses - i - 1; j++)
-        {
-            if (Rqueue[j].arrTime > Rqueue[j + 1].arrTime)
-            {
-                struct proc *T = (struct proc *)malloc(sizeof(struct proc));
-                T->arrTime = Rqueue[j].arrTime;
-                T->currState = Rqueue[j].currState;
-                T->pid = Rqueue[j].pid;
-                T->initStartTime = Rqueue[j].initStartTime;
-                T->finalEndTime = Rqueue[j].finalEndTime;
-                T->burstTime = Rqueue[j].burstTime;
+  for (int i = 0; i < NoOfProcesses; i++) {
+    for (int j = 0; j < NoOfProcesses - i - 1; j++) {
+      if (Rqueue[j].arrTime > Rqueue[j + 1].arrTime) {
+        struct proc T;
+        int temp;
+        T.arrTime       = Rqueue[j].arrTime;
+        T.currState     = Rqueue[j].currState;
+        T.pid           = Rqueue[j].pid;
+        T.initStartTime = Rqueue[j].initStartTime;
+        T.finalEndTime  = Rqueue[j].finalEndTime;
+        T.burstTime     = Rqueue[j].burstTime;
+        temp            = tempStoreBT[j];
 
-                Rqueue[j].arrTime = Rqueue[j + 1].arrTime;
-                Rqueue[j].currState = Rqueue[j + 1].currState;
-                Rqueue[j].pid = Rqueue[j + 1].pid;
-                Rqueue[j].burstTime = Rqueue[j + 1].burstTime;
-                Rqueue[j].initStartTime = Rqueue[j+1].initStartTime;
-                Rqueue[j].finalEndTime = Rqueue[j+1].finalEndTime;
-                
-                Rqueue[j + 1].arrTime = T->arrTime;
-                Rqueue[j + 1].currState = T->currState;
-                Rqueue[j + 1].pid = T->pid;
-                Rqueue[j + 1].burstTime = T->burstTime;
-                Rqueue[j + 1].initStartTime = T->initStartTime;
-                Rqueue[j + 1].finalEndTime = T->finalEndTime;
-                free(T);
-            }
-        }
+        Rqueue[j].arrTime       = Rqueue[j + 1].arrTime;
+        Rqueue[j].currState     = Rqueue[j + 1].currState;
+        Rqueue[j].pid           = Rqueue[j + 1].pid;
+        Rqueue[j].burstTime     = Rqueue[j + 1].burstTime;
+        Rqueue[j].initStartTime = Rqueue[j + 1].initStartTime;
+        Rqueue[j].finalEndTime  = Rqueue[j + 1].finalEndTime;
+        tempStoreBT[j]          = tempStoreBT[j + 1];
+
+        Rqueue[j + 1].arrTime       = T.arrTime;
+        Rqueue[j + 1].currState     = T.currState;
+        Rqueue[j + 1].pid           = T.pid;
+        Rqueue[j + 1].burstTime     = T.burstTime;
+        Rqueue[j + 1].initStartTime = T.initStartTime;
+        Rqueue[j + 1].finalEndTime  = T.finalEndTime;
+        tempStoreBT[j + 1]          = temp;
+      }
     }
-  
+  }
 }
 
 int isAllDone() {
@@ -121,6 +105,7 @@ void __CPU_SCHED(int idx) {
   if (BT == tempStoreBT[idx]) {
     Rqueue[idx].initStartTime = CLK_CYCLE;
   }
+
   int currJobBT = Qt;
   while (BT > 0 && currJobBT > 0) {
     CLK_CYCLE++;
@@ -146,39 +131,21 @@ void proc() {
       return;
 
     int i;
-
-    for (i = 0; i < NoOfProcesses; i++) {
-      if (Rqueue[i].currState == RUNNABLE) {
-
-        // find the minBT process
-         /**
-         * TODO: Implement the loogic for the insert in the queue
-         */
-
-        // int minBT = i;
-        // for (int j = 0; j < NoOfProcesses; j++) {
-        //   if (Rqueue[j].currState == RUNNABLE && 
-        //         Rqueue[minBT].priority > Rqueue[j].priority)
-        //       minBT = j;
-        //   if (Rqueue[j].currState == RUNNABLE && 
-        //         Rqueue[minBT].priority == Rqueue[j].priority &&
-        //         Rqueue[minBT].arrTime > Rqueue[j].arrTime)
-        //       minBT = j;
-        }
-
-        i = minBT;
-        __CPU_SCHED(i);
-
-        break;
-      }
-      
-    }
-    if (i == NoOfProcesses) {
+    i = popRQ();
+    if (i == -999) {
       // no process was found
       CLK_CYCLE++;
+    } else {
+      __CPU_SCHED(i);
     }
+
     // when a process gets completed the scheduler is called
     sched();
+    // reinsertion
+    if (i != -999 && Rqueue[i].currState == RUNNABLE) {
+      // reinsert else dont reinsert
+      pushRQ(i);
+    }
   }
 }
 
@@ -190,8 +157,8 @@ void ReportDis() {
     int RT = Rqueue[i].initStartTime - Rqueue[i].arrTime;
     int WT = TT - tempStoreBT[i];
     Swt += WT;
-    printf("Process\tPID: %d\tBT: %d\tAT: %d\tTT: %d\tWT: %d\tRT: %d\n",
-           Rqueue[i].pid, tempStoreBT[i], Rqueue[i].arrTime, TT, WT, RT);
+    printf("Process\tPID: %d\tAT: %d\tBT: %d\tTT: %d\tWT: %d\tRT: %d\n",
+           Rqueue[i].pid, Rqueue[i].arrTime, tempStoreBT[i],  TT, WT, RT);
   }
   printf("Avg WT: %f\n", (float)(Swt)/NoOfProcesses);
 }
@@ -200,6 +167,10 @@ int main() {
   CLK_CYCLE = 0;
   printf("Enter number of processes");
   scanf("%d", &NoOfProcesses);
+  if (NoOfProcesses > SIZE) {
+    system("echo \"$(tput setaf 1)$(tput bold)ERR: $(tput init)No of processes greater than Ready Queue CAPACITY\"");
+    return 1;
+  }
   Rqueue = (struct proc *)malloc(sizeof(struct proc) * NoOfProcesses);
   tempStoreBT = (int *)malloc(sizeof(int) * NoOfProcesses);
   initRQ();
