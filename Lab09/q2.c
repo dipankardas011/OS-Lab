@@ -1,3 +1,9 @@
+/**
+ * 3 processes P1, P2 and P3 arrive at time 0 their execution time is 10 millisecond, 15 milliseconds and 20 milliseconds respectively. 
+ * They spend their first 20% of the execution time in doing IO next 60% of time on CPU processing and the last 20% again doing the IO. 
+ * Find percentage of time was the CPU free. Write the program using round Robin CPU scheduling algorithm with the time counter 5 milliseconds in C
+ */
+
 #include <stdbool.h>
 
 #ifndef STDIO_H
@@ -12,6 +18,7 @@
 static int Qt = 5; // 3 Qt
 
 int NoOfProcesses;
+static int freeTime;
 
 void enterData() {
   printf("Enter the PID, BurstTime for each proc\n");
@@ -97,6 +104,7 @@ void proc() {
     i = popRQ();
     if (i == -999) {
       // no process was found
+      freeTime++;
       CLK_CYCLE++;
       refreshWQ();
     } else {
@@ -126,9 +134,11 @@ void ReportDis() {
            Rqueue[i].pid, Rqueue[i].arrTime, tempStoreIO1[i], tempStoreBT[i], tempStoreIO2[i], TT, WT, RT);
   }
   printf("Avg WT: %f\n", (float)(Swt)/NoOfProcesses);
+  printf("Free Time of CPU: %d\n", freeTime);
 }
 
-int main() {
+
+int main(int argc, char** argv) {
   CLK_CYCLE = 0;
   printf("Enter number of processes");
   scanf("%d", &NoOfProcesses);
@@ -155,5 +165,6 @@ int main() {
   free(tempStoreBT);
   free(tempStoreIO1);
   free(tempStoreIO2);
+  remove(argv[0]);
   return 0;
 }
